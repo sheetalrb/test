@@ -1,7 +1,5 @@
 package com.uxpsystems.assignment.model;
 
-import java.io.IOException;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
