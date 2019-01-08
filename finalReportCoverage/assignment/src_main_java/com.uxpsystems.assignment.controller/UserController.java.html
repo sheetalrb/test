@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>UserController.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">assignment (1) (8 Jan, 2019 8:57:54 PM)</a> &gt; <a href="../../index.html" class="el_group">assignment</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.uxpsystems.assignment.controller</a> &gt; <span class="el_source">UserController.java</span></div><h1>UserController.java</h1><pre class="source lang-java linenums">package com.uxpsystems.assignment.controller;
+
+import java.util.List;
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.uxpsystems.assignment.model.User;
+import com.uxpsystems.assignment.service.UserService;
+
+/**
+ * REST controller for managing User.
+ */
+@RestController
+@RequestMapping(&quot;/api&quot;)
+// @Component
+public class UserController {
+
+<span class="fc" id="L31">	private final Logger log = LoggerFactory.getLogger(UserController.class);</span>
+
+	@Autowired
+	private final UserService userService;
+
+<span class="fc" id="L36">	public UserController(UserService userService) {</span>
+<span class="fc" id="L37">		this.userService = userService;</span>
+<span class="fc" id="L38">	}</span>
+
+	/**
+	 * GET /users : get all the users.
+	 *
+	 * @return the ResponseEntity with status 200 (OK) and the list of users in
+	 *         body
+	 */
+	@GetMapping(&quot;/users&quot;)
+	public ResponseEntity&lt;List&lt;User&gt;&gt; getUsers() {
+<span class="fc" id="L48">		log.debug(&quot;REST request to get all Users&quot;);</span>
+<span class="fc" id="L49">		return new ResponseEntity&lt;List&lt;User&gt;&gt;(userService.getAll(), HttpStatus.OK);</span>
+	}
+
+	/**
+	 * GET /user/:id : get the &quot;id&quot; user.
+	 *
+	 * @param id
+	 *            the id of the user to retrieve
+	 * @return the ResponseEntity with status 200 (OK) and with body the user,
+	 *         or exception with status 500 (Internal Server Error) user not found
+	 * @throws Exception
+	 */
+	@GetMapping(&quot;/user/{id}&quot;)
+	public ResponseEntity&lt;User&gt; getUser(@PathVariable Long id) throws Exception {
+<span class="fc" id="L63">		log.debug(&quot;REST request to get User : {}&quot;, id);</span>
+<span class="fc" id="L64">		Optional&lt;User&gt; user = userService.findById(id);</span>
+<span class="fc" id="L65">		User result = user.orElse(null);</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">		if (result == null) {</span>
+<span class="nc" id="L67">			throw new Exception(&quot;User not found&quot;);</span>
+		}
+<span class="fc" id="L69">		return new ResponseEntity&lt;User&gt;(result, HttpStatus.OK);</span>
+	}
+
+	/**
+	 * DELETE /user/:id : delete the &quot;id&quot; user.
+	 *
+	 * @param id
+	 *            the id of the user to delete
+	 * @return the ResponseEntity with status 200 (OK) if deleted or exception with status 500 (Internal Server Error) no class user entity with ID exists
+	 */
+	@DeleteMapping(&quot;/user/{id}&quot;)
+	public ResponseEntity&lt;Void&gt; deleteUser(@PathVariable Long id) {
+<span class="fc" id="L81">		log.debug(&quot;REST request to delete User : {}&quot;, id);</span>
+<span class="fc" id="L82">		userService.delete(id);</span>
+<span class="fc" id="L83">		return new ResponseEntity&lt;Void&gt;(HttpStatus.OK);</span>
+	}
+
+	/**
+	 * POST /user : Create a new user.
+	 *
+	 * @param user
+	 *            the user to create
+	 * @return the ResponseEntity with status 201 (Created) and with body the
+	 *         new user, or exception if the user has already an ID
+	 * @throws Exception
+	 */
+	@PostMapping(&quot;/user&quot;)
+	public ResponseEntity&lt;User&gt; createUser(@RequestBody User user) throws Exception {
+<span class="fc" id="L97">		log.debug(&quot;REST request to save User : {}&quot;, user);</span>
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">		if (user.getId() != null) {</span>
+<span class="nc" id="L99">			throw new Exception(&quot;A new user cannot already have an ID&quot;);</span>
+		}
+<span class="fc" id="L101">		User result = userService.save(user);</span>
+<span class="fc" id="L102">		log.debug(&quot;Added new user:: &quot; + user);</span>
+<span class="fc" id="L103">		return new ResponseEntity&lt;User&gt;(result, HttpStatus.CREATED);</span>
+	}
+
+	/**
+	 * PUT /user : Updates an existing user.
+	 *
+	 * @param user
+	 *            the user to update
+	 * @return the ResponseEntity with status 200 (OK) and with body the updated
+	 *         user, or exception with status 500 (Internal Server Error) invalid ID, ID is null.
+	 * @throws Exception
+	 */
+	@PutMapping(&quot;/user&quot;)
+	public ResponseEntity&lt;User&gt; updateUser(@RequestBody User user) throws Exception {
+<span class="fc" id="L117">		log.debug(&quot;REST request to update User : {}&quot;, user);</span>
+
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">		if (user.getId() == null) {</span>
+<span class="nc" id="L120">			throw new Exception(&quot;Invalid ID, ID is null&quot;);</span>
+		}
+
+<span class="fc" id="L123">		User result = userService.save(user);</span>
+<span class="fc" id="L124">		return new ResponseEntity&lt;User&gt;(result, HttpStatus.OK);</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span>assignment (1) (8 Jan, 2019 8:57:54 PM)</div></body></html>

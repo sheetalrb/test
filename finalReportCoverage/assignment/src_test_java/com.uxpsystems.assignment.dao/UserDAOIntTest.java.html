@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>UserDAOIntTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">assignment (1) (8 Jan, 2019 8:57:54 PM)</a> &gt; <a href="../../index.html" class="el_group">assignment</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">com.uxpsystems.assignment.dao</a> &gt; <span class="el_source">UserDAOIntTest.java</span></div><h1>UserDAOIntTest.java</h1><pre class="source lang-java linenums">package com.uxpsystems.assignment.dao;
+
+import java.util.Optional;
+
+import javax.persistence.EntityManager;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import com.uxpsystems.assignment.model.Status;
+import com.uxpsystems.assignment.model.User;
+
+import org.junit.Assert;
+
+@RunWith(SpringRunner.class)
+@DataJpaTest
+<span class="fc" id="L20">public class UserDAOIntTest {</span>
+
+	private static final String FIRST_USER_NAME = &quot;AAAAAAAAAA&quot;;
+	private static final String SECOND_USER_NAME = &quot;BBBBBBBBBB&quot;;
+
+	private static final String FIRST_PASSWORD = &quot;AAAAAAAAAA&quot;;
+	private static final String SECOND_PASSWORD = &quot;BBBBBBBBBB&quot;;
+
+<span class="fc" id="L28">	private static final Status FIRST_STATUS = Status.ACTIVATED;</span>
+<span class="fc" id="L29">	private static final Status SECOND_STATUS = Status.DEACTIVATED;</span>
+
+	@Autowired
+	private EntityManager em;
+
+	@Autowired
+	private UserDAO userDao;
+
+	/**
+	 * Create an entity1 for this test.
+	 *
+	 * This is a static method, as tests for other entities might also need it,
+	 * if they test an entity which requires the current entity.
+	 */
+	public static User createEntity1(EntityManager em) {
+<span class="fc" id="L44">		User user = new User();</span>
+<span class="fc" id="L45">		user.setUsername(FIRST_USER_NAME);</span>
+<span class="fc" id="L46">		user.setPassword(FIRST_PASSWORD);</span>
+<span class="fc" id="L47">		user.setStatus(FIRST_STATUS);</span>
+<span class="fc" id="L48">		return user;</span>
+	}
+	
+	/**
+	 * Create an entity2 for this test.
+	 *
+	 * This is a static method, as tests for other entities might also need it,
+	 * if they test an entity which requires the current entity.
+	 */
+	public static User createEntity2(EntityManager em) {
+<span class="fc" id="L58">		User user = new User();</span>
+<span class="fc" id="L59">		user.setUsername(SECOND_USER_NAME);</span>
+<span class="fc" id="L60">		user.setPassword(SECOND_PASSWORD);</span>
+<span class="fc" id="L61">		user.setStatus(SECOND_STATUS);</span>
+<span class="fc" id="L62">		return user;</span>
+	}
+
+	@Test
+	public void testSave() throws Exception {
+<span class="fc" id="L67">		User user = createEntity1(em);</span>
+<span class="fc" id="L68">		User result = userDao.save(user);</span>
+<span class="fc" id="L69">		Assert.assertNotNull(userDao.findById(result.getId()));</span>
+<span class="fc" id="L70">	}</span>
+
+	@Test
+	public void testDeleteById() throws Exception {
+<span class="fc" id="L74">		User user = createEntity1(em);</span>
+<span class="fc" id="L75">		User result = userDao.save(user);</span>
+<span class="fc" id="L76">		userDao.deleteById(result.getId());</span>
+
+		// after the user is deleted, try to find it out
+<span class="fc" id="L79">		Optional&lt;User&gt; opUser = userDao.findById(result.getId());</span>
+<span class="fc" id="L80">		User deletedUser = opUser.orElse(null);</span>
+<span class="fc" id="L81">		Assert.assertNull(deletedUser);</span>
+<span class="fc" id="L82">	}</span>
+	
+	@Test
+	public void testFindAll() throws Exception {
+<span class="fc" id="L86">		User user1 = createEntity1(em);</span>
+<span class="fc" id="L87">		User user2 = createEntity2(em);</span>
+<span class="fc" id="L88">		userDao.save(user1);</span>
+<span class="fc" id="L89">		userDao.save(user2);</span>
+	
+		// check there are two users existing
+<span class="fc" id="L92">		Assert.assertEquals(2, userDao.findAll().size());</span>
+<span class="fc" id="L93">	}</span>
+	
+	@Test
+	public void testGetOne() throws Exception {
+<span class="fc" id="L97">		User user1 = createEntity1(em);</span>
+<span class="fc" id="L98">		User user2 = createEntity2(em);</span>
+<span class="fc" id="L99">		userDao.save(user1);</span>
+<span class="fc" id="L100">		userDao.save(user2);</span>
+	
+<span class="fc" id="L102">		User user = userDao.getOne(user2.getId());</span>
+		
+		// check for the name of the second user
+<span class="fc" id="L105">		Assert.assertEquals(SECOND_USER_NAME, user.getUsername());</span>
+<span class="fc" id="L106">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span>assignment (1) (8 Jan, 2019 8:57:54 PM)</div></body></html>

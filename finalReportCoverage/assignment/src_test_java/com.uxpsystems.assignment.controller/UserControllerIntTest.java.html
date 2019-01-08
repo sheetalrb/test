@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>UserControllerIntTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">assignment (1) (8 Jan, 2019 8:57:54 PM)</a> &gt; <a href="../../index.html" class="el_group">assignment</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">com.uxpsystems.assignment.controller</a> &gt; <span class="el_source">UserControllerIntTest.java</span></div><h1>UserControllerIntTest.java</h1><pre class="source lang-java linenums">package com.uxpsystems.assignment.controller;
+
+import com.uxpsystems.assignment.AssignmentApplication;
+import com.uxpsystems.assignment.dao.UserDAO;
+import com.uxpsystems.assignment.model.Status;
+import com.uxpsystems.assignment.model.User;
+import com.uxpsystems.assignment.service.UserService;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+/**
+ * Test class for the UserController REST controller.
+ *
+ * @see UserController
+ */
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = AssignmentApplication.class)
+<span class="fc" id="L37">public class UserControllerIntTest {</span>
+
+    private static final String DEFAULT_USER_NAME = &quot;AAAAAAAAAA&quot;;
+    private static final String UPDATED_USER_NAME = &quot;BBBBBBBBBB&quot;;
+
+    private static final String DEFAULT_PASSWORD = &quot;AAAAAAAAAA&quot;;
+    private static final String UPDATED_PASSWORD = &quot;BBBBBBBBBB&quot;;
+
+<span class="fc" id="L45">    private static final Status DEFAULT_STATUS = Status.ACTIVATED;</span>
+<span class="fc" id="L46">    private static final Status UPDATED_STATUS = Status.DEACTIVATED;</span>
+
+    @Autowired
+    private UserDAO userDao;
+
+    @Autowired
+    private UserService userService;
+
+
+    @Autowired
+    private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
+
+    @Autowired
+    private EntityManager em;
+
+    private MockMvc restUserMockMvc;
+
+    private User user;
+
+    @Before
+    public void setup() {
+<span class="fc" id="L67">        MockitoAnnotations.initMocks(this);</span>
+<span class="fc" id="L68">        final UserController userController = new UserController(userService);</span>
+<span class="fc" id="L69">        this.restUserMockMvc = MockMvcBuilders.standaloneSetup(userController)</span>
+<span class="fc" id="L70">            .setCustomArgumentResolvers(pageableArgumentResolver).build();</span>
+<span class="fc" id="L71">    }</span>
+
+    /**
+     * Create an entity for this test.
+     *
+     * This is a static method, as tests for other entities might also need it,
+     * if they test an entity which requires the current entity.
+     */
+    public static User createEntity(EntityManager em) {
+<span class="fc" id="L80">    	User user = new User();</span>
+<span class="fc" id="L81">    	user.setUsername(DEFAULT_USER_NAME);</span>
+<span class="fc" id="L82">    	user.setPassword(DEFAULT_PASSWORD);</span>
+<span class="fc" id="L83">    	user.setStatus(DEFAULT_STATUS);</span>
+<span class="fc" id="L84">        return user;</span>
+    }
+
+    @Before
+    public void initTest() {
+<span class="fc" id="L89">    	user = createEntity(em);</span>
+<span class="fc" id="L90">    }</span>
+
+    @Test
+    @Transactional
+    public void createUser() throws Exception {
+<span class="fc" id="L95">        int databaseSizeBeforeCreate = userService.getAll().size();</span>
+<span class="fc" id="L96">        System.out.println(&quot;Size of databse before create is=&gt;&quot; + databaseSizeBeforeCreate);</span>
+        // Create the User
+<span class="fc" id="L98">        restUserMockMvc.perform(post(&quot;/api/user&quot;)</span>
+<span class="fc" id="L99">            .contentType(TestUtil.APPLICATION_JSON_UTF8)</span>
+<span class="fc" id="L100">            .content(TestUtil.convertObjectToJsonBytes(user)))</span>
+<span class="fc" id="L101">            .andExpect(status().isCreated());</span>
+
+        // Validate the user in the database
+<span class="fc" id="L104">        List&lt;User&gt; userList = userService.getAll();</span>
+<span class="fc" id="L105">        assertThat(userList).hasSize(databaseSizeBeforeCreate + 1);</span>
+<span class="fc" id="L106">        User testUser = userList.get(userList.size() - 1);</span>
+<span class="fc" id="L107">        assertThat(testUser.getUsername()).isEqualTo(DEFAULT_USER_NAME);</span>
+<span class="fc" id="L108">        assertThat(testUser.getPassword()).isEqualTo(DEFAULT_PASSWORD);</span>
+<span class="fc" id="L109">        assertThat(testUser.getStatus()).isEqualTo(DEFAULT_STATUS);</span>
+<span class="fc" id="L110">    }</span>
+    
+    @Test
+    @Transactional
+    public void updateUser() throws Exception {
+    	// Initialize the database
+<span class="fc" id="L116">    	userDao.saveAndFlush(user);</span>
+
+<span class="fc" id="L118">        int databaseSizeBeforeUpdate = userDao.findAll().size();</span>
+<span class="fc" id="L119">        System.out.println(&quot;Size of databse before update is=&gt;&quot; + databaseSizeBeforeUpdate);</span>
+        
+        // Update the user1
+<span class="fc" id="L122">        User updatedUser = userDao.findById(user.getId()).get();</span>
+        // Disconnect from session so that the updates on updatedUser1 are not directly saved in db
+       // em.detach(updatedUser);
+<span class="fc" id="L125">        updatedUser.setUsername(UPDATED_USER_NAME);</span>
+<span class="fc" id="L126">        updatedUser.setPassword(UPDATED_PASSWORD);</span>
+<span class="fc" id="L127">        updatedUser.setStatus(UPDATED_STATUS);</span>
+
+        //update user
+<span class="fc" id="L130">        restUserMockMvc.perform(put(&quot;/api/user&quot;)</span>
+<span class="fc" id="L131">            .contentType(TestUtil.APPLICATION_JSON_UTF8)</span>
+<span class="fc" id="L132">            .content(TestUtil.convertObjectToJsonBytes(updatedUser)))</span>
+<span class="fc" id="L133">            .andExpect(status().isOk());</span>
+
+        // Validate the user in the database
+<span class="fc" id="L136">        List&lt;User&gt; userList = userDao.findAll();</span>
+<span class="fc" id="L137">        assertThat(userList).hasSize(databaseSizeBeforeUpdate);</span>
+<span class="fc" id="L138">        User testUser = userList.get(userList.size() - 1);</span>
+<span class="fc" id="L139">        assertThat(testUser.getUsername()).isEqualTo(UPDATED_USER_NAME);</span>
+<span class="fc" id="L140">        assertThat(testUser.getPassword()).isEqualTo(UPDATED_PASSWORD);</span>
+<span class="fc" id="L141">        assertThat(testUser.getStatus()).isEqualTo(UPDATED_STATUS);</span>
+<span class="fc" id="L142">    }</span>
+
+    @Test
+    @Transactional
+    public void deleteUser() throws Exception {
+        // Initialize the database
+<span class="fc" id="L148">    	userDao.saveAndFlush(user);</span>
+
+<span class="fc" id="L150">        int databaseSizeBeforeDelete = userDao.findAll().size();</span>
+<span class="fc" id="L151">        System.out.println(&quot;Size of databse before delete is=&gt;&quot; + databaseSizeBeforeDelete);</span>
+        
+        // delete user
+<span class="fc" id="L154">        restUserMockMvc.perform(delete(&quot;/api/user/{id}&quot;, user.getId())</span>
+<span class="fc" id="L155">            .accept(TestUtil.APPLICATION_JSON_UTF8))</span>
+<span class="fc" id="L156">            .andExpect(status().isOk());</span>
+
+        // Validate the database is empty
+<span class="fc" id="L159">        List&lt;User&gt; user1List = userDao.findAll();</span>
+<span class="fc" id="L160">        assertThat(user1List).hasSize(databaseSizeBeforeDelete - 1);</span>
+<span class="fc" id="L161">    }</span>
+    
+    
+    @Test
+    @Transactional
+    public void getUsers() throws Exception {
+        // Initialize the database
+<span class="fc" id="L168">    	userDao.saveAndFlush(user);</span>
+
+        // Get all the userList
+<span class="fc" id="L171">    	restUserMockMvc.perform(get(&quot;/api/users&quot;))</span>
+<span class="fc" id="L172">            .andExpect(status().isOk())</span>
+<span class="fc" id="L173">            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))</span>
+<span class="fc" id="L174">            .andExpect(jsonPath(&quot;$.[*].id&quot;).value(hasItem(user.getId().intValue())))</span>
+<span class="fc" id="L175">            .andExpect(jsonPath(&quot;$.[*].username&quot;).value(hasItem(DEFAULT_USER_NAME.toString())))</span>
+<span class="fc" id="L176">            .andExpect(jsonPath(&quot;$.[*].password&quot;).value(hasItem(DEFAULT_PASSWORD.toString())))</span>
+<span class="fc" id="L177">            .andExpect(jsonPath(&quot;$.[*].status&quot;).value(hasItem(DEFAULT_STATUS.toString())));</span>
+<span class="fc" id="L178">    }</span>
+    
+    @Test
+    @Transactional
+    public void getUser() throws Exception {
+        // Initialize the database
+<span class="fc" id="L184">    	userDao.saveAndFlush(user);</span>
+
+        // Get the user1
+<span class="fc" id="L187">    	restUserMockMvc.perform(get(&quot;/api/user/{id}&quot;, user.getId()))</span>
+<span class="fc" id="L188">            .andExpect(status().isOk())</span>
+<span class="fc" id="L189">            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))</span>
+<span class="fc" id="L190">            .andExpect(jsonPath(&quot;$.id&quot;).value(user.getId().intValue()))</span>
+<span class="fc" id="L191">            .andExpect(jsonPath(&quot;$.username&quot;).value(DEFAULT_USER_NAME.toString()))</span>
+<span class="fc" id="L192">            .andExpect(jsonPath(&quot;$.password&quot;).value(DEFAULT_PASSWORD.toString()))</span>
+<span class="fc" id="L193">            .andExpect(jsonPath(&quot;$.status&quot;).value(DEFAULT_STATUS.toString()));</span>
+<span class="fc" id="L194">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span>assignment (1) (8 Jan, 2019 8:57:54 PM)</div></body></html>

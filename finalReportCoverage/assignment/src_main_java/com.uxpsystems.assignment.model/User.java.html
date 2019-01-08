@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>User.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">assignment (1) (8 Jan, 2019 8:57:54 PM)</a> &gt; <a href="../../index.html" class="el_group">assignment</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.uxpsystems.assignment.model</a> &gt; <span class="el_source">User.java</span></div><h1>User.java</h1><pre class="source lang-java linenums">package com.uxpsystems.assignment.model;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+
+/**
+ * Entity bean with JPA annotations
+ * Hibernate provides JPA implementation
+ *
+ */
+@Entity
+@Table(name=&quot;USER&quot;)
+public class User implements java.io.Serializable{
+
+	private static final long serialVersionUID = 4910225916550731446L;
+	
+	@Id
+	@Column(name=&quot;id&quot;)
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private Long id;
+	
+	@Column(name = &quot;username&quot;, nullable = false, unique = true)
+	private String username;
+	
+	@Column(name = &quot;password&quot;, nullable = false)
+	private String password;
+	
+	@Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
+	//@JsonCreator(mode=JsonCreator.Mode.DELEGATING)
+<span class="nc" id="L40">	public User(String username, String password, Status status) {</span>
+<span class="nc" id="L41">		this.username = username;</span>
+<span class="nc" id="L42">		this.password = password;</span>
+<span class="nc" id="L43">		this.status = status;</span>
+<span class="nc" id="L44">	}</span>
+	
+	//empty constructor
+<span class="fc" id="L47">	public User() {</span>
+	
+<span class="fc" id="L49">	}</span>
+
+	public Long getId() {
+<span class="fc" id="L52">		return id;</span>
+	}
+
+	public void setId(Long id) {
+<span class="fc" id="L56">		this.id = id;</span>
+<span class="fc" id="L57">	}</span>
+
+	public String getUsername() {
+<span class="fc" id="L60">		return username;</span>
+	}
+
+	public void setUsername(String username) {
+<span class="fc" id="L64">		this.username = username;</span>
+<span class="fc" id="L65">	}</span>
+
+	public String getPassword() {
+<span class="fc" id="L68">		return password;</span>
+	}
+
+	public void setPassword(String password) {
+<span class="fc" id="L72">		this.password = password;</span>
+<span class="fc" id="L73">	}</span>
+
+	public Status getStatus() {
+<span class="fc" id="L76">		return status;</span>
+	}
+
+	public void setStatus(Status status) {
+<span class="fc" id="L80">		this.status = status;</span>
+<span class="fc" id="L81">	}</span>
+
+	//TODO do not print password here, violating security principle
+	@Override
+	public String toString() {
+<span class="fc" id="L86">		return &quot;User [id=&quot; + id + &quot;, username=&quot; + username + &quot;, password=&quot; + password + &quot;, status=&quot; + status + &quot;]&quot;;</span>
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">		if (this == obj)</span>
+<span class="nc" id="L92">			return true;</span>
+<span class="pc bpc" id="L93" title="3 of 6 branches missed.">		if (id == null || obj == null || getClass() != obj.getClass())</span>
+<span class="nc" id="L94">			return false;</span>
+<span class="fc" id="L95">		User toCompare = (User) obj;</span>
+<span class="fc" id="L96">		return id.equals(toCompare.id);</span>
+	}
+
+	@Override
+	public int hashCode() {
+<span class="nc bnc" id="L101" title="All 2 branches missed.">		return id == null ? 0 : id.hashCode();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span>assignment (1) (8 Jan, 2019 8:57:54 PM)</div></body></html>

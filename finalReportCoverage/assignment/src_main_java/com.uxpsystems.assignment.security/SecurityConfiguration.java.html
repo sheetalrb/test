@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>SecurityConfiguration.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">assignment (1) (8 Jan, 2019 8:57:54 PM)</a> &gt; <a href="../../index.html" class="el_group">assignment</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.uxpsystems.assignment.security</a> &gt; <span class="el_source">SecurityConfiguration.java</span></div><h1>SecurityConfiguration.java</h1><pre class="source lang-java linenums">package com.uxpsystems.assignment.security;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
+
+@Configuration
+@EnableWebSecurity
+<span class="fc" id="L16">public class SecurityConfiguration extends WebSecurityConfigurerAdapter {</span>
+ 
+<span class="fc" id="L18">    private static String REALM=&quot;MY_TEST_REALM&quot;;</span>
+     
+    @Autowired
+    public void configureGlobalSecurity(AuthenticationManagerBuilder auth) throws Exception {
+<span class="fc" id="L22">        auth.inMemoryAuthentication().withUser(&quot;admin&quot;).password(&quot;{noop}admin&quot;).roles(&quot;ADMIN&quot;);</span>
+<span class="fc" id="L23">        auth.inMemoryAuthentication().withUser(&quot;user&quot;).password(&quot;{noop}user&quot;).roles(&quot;USER&quot;);</span>
+<span class="fc" id="L24">    }</span>
+    
+    @Override
+	protected void configure(HttpSecurity http) throws Exception {
+ 
+<span class="fc" id="L29">	  http.csrf().disable()</span>
+<span class="fc" id="L30">	  	.authorizeRequests()</span>
+<span class="fc" id="L31">	  	.antMatchers(&quot;/api/**&quot;).hasRole(&quot;ADMIN&quot;)</span>
+<span class="fc" id="L32">		.and().httpBasic().realmName(REALM).authenticationEntryPoint(getBasicAuthEntryPoint())</span>
+<span class="fc" id="L33">		.and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);//We don't need sessions to be created.</span>
+	  
+<span class="fc" id="L35"> 	}</span>
+    
+    @Bean
+    public CustomBasicAuthenticationEntryPoint getBasicAuthEntryPoint(){
+<span class="fc" id="L39">        return new CustomBasicAuthenticationEntryPoint();</span>
+    }
+    
+    /* To allow Pre-flight [OPTIONS] request from browser */
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+<span class="fc" id="L45">        web.ignoring().antMatchers(HttpMethod.OPTIONS, &quot;/**&quot;);</span>
+<span class="fc" id="L46">    }</span>
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span>assignment (1) (8 Jan, 2019 8:57:54 PM)</div></body></html>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>TestUtil.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">assignment (1) (8 Jan, 2019 8:57:54 PM)</a> &gt; <a href="../../index.html" class="el_group">assignment</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">com.uxpsystems.assignment.controller</a> &gt; <span class="el_source">TestUtil.java</span></div><h1>TestUtil.java</h1><pre class="source lang-java linenums">package com.uxpsystems.assignment.controller;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeDiagnosingMatcher;
+import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
+import org.springframework.format.support.DefaultFormattingConversionService;
+import org.springframework.format.support.FormattingConversionService;
+import org.springframework.http.MediaType;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+/**
+ * Utility class for testing REST controllers.
+ */
+<span class="nc" id="L23">public class TestUtil {</span>
+
+    /** MediaType for JSON UTF8 */
+<span class="fc" id="L26">    public static final MediaType APPLICATION_JSON_UTF8 = new MediaType(</span>
+<span class="fc" id="L27">            MediaType.APPLICATION_JSON.getType(),</span>
+<span class="fc" id="L28">            MediaType.APPLICATION_JSON.getSubtype(), StandardCharsets.UTF_8);</span>
+
+    /**
+     * Convert an object to JSON byte array.
+     *
+     * @param object
+     *            the object to convert
+     * @return the JSON byte array
+     * @throws IOException
+     */
+    public static byte[] convertObjectToJsonBytes(Object object)
+            throws IOException {
+<span class="fc" id="L40">        ObjectMapper mapper = new ObjectMapper();</span>
+<span class="fc" id="L41">        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);</span>
+
+<span class="fc" id="L43">        JavaTimeModule module = new JavaTimeModule();</span>
+<span class="fc" id="L44">        mapper.registerModule(module);</span>
+
+<span class="fc" id="L46">        return mapper.writeValueAsBytes(object);</span>
+    }
+
+    /**
+     * Create a byte array with a specific size filled with specified data.
+     *
+     * @param size the size of the byte array
+     * @param data the data to put in the byte array
+     * @return the JSON byte array
+     */
+    public static byte[] createByteArray(int size, String data) {
+<span class="nc" id="L57">        byte[] byteArray = new byte[size];</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        for (int i = 0; i &lt; size; i++) {</span>
+<span class="nc" id="L59">            byteArray[i] = Byte.parseByte(data, 2);</span>
+        }
+<span class="nc" id="L61">        return byteArray;</span>
+    }
+
+    /**
+     * A matcher that tests that the examined string represents the same instant as the reference datetime.
+     */
+    public static class ZonedDateTimeMatcher extends TypeSafeDiagnosingMatcher&lt;String&gt; {
+
+        private final ZonedDateTime date;
+
+<span class="nc" id="L71">        public ZonedDateTimeMatcher(ZonedDateTime date) {</span>
+<span class="nc" id="L72">            this.date = date;</span>
+<span class="nc" id="L73">        }</span>
+
+        @Override
+        protected boolean matchesSafely(String item, Description mismatchDescription) {
+            try {
+<span class="nc bnc" id="L78" title="All 2 branches missed.">                if (!date.isEqual(ZonedDateTime.parse(item))) {</span>
+<span class="nc" id="L79">                    mismatchDescription.appendText(&quot;was &quot;).appendValue(item);</span>
+<span class="nc" id="L80">                    return false;</span>
+                }
+<span class="nc" id="L82">                return true;</span>
+<span class="nc" id="L83">            } catch (DateTimeParseException e) {</span>
+<span class="nc" id="L84">                mismatchDescription.appendText(&quot;was &quot;).appendValue(item)</span>
+<span class="nc" id="L85">                    .appendText(&quot;, which could not be parsed as a ZonedDateTime&quot;);</span>
+<span class="nc" id="L86">                return false;</span>
+            }
+
+        }
+
+        @Override
+        public void describeTo(Description description) {
+<span class="nc" id="L93">            description.appendText(&quot;a String representing the same Instant as &quot;).appendValue(date);</span>
+<span class="nc" id="L94">        }</span>
+    }
+
+    /**
+     * Creates a matcher that matches when the examined string reprensents the same instant as the reference datetime
+     * @param date the reference datetime against which the examined string is checked
+     */
+    public static ZonedDateTimeMatcher sameInstant(ZonedDateTime date) {
+<span class="nc" id="L102">        return new ZonedDateTimeMatcher(date);</span>
+    }
+
+    /**
+     * Verifies the equals/hashcode contract on the domain object.
+     */
+    public static &lt;T&gt; void equalsVerifier(Class&lt;T&gt; clazz) throws Exception {
+<span class="nc" id="L109">        T domainObject1 = clazz.getConstructor().newInstance();</span>
+<span class="nc" id="L110">        assertThat(domainObject1.toString()).isNotNull();</span>
+<span class="nc" id="L111">        assertThat(domainObject1).isEqualTo(domainObject1);</span>
+<span class="nc" id="L112">        assertThat(domainObject1.hashCode()).isEqualTo(domainObject1.hashCode());</span>
+        // Test with an instance of another class
+<span class="nc" id="L114">        Object testOtherObject = new Object();</span>
+<span class="nc" id="L115">        assertThat(domainObject1).isNotEqualTo(testOtherObject);</span>
+<span class="nc" id="L116">        assertThat(domainObject1).isNotEqualTo(null);</span>
+        // Test with an instance of the same class
+<span class="nc" id="L118">        T domainObject2 = clazz.getConstructor().newInstance();</span>
+<span class="nc" id="L119">        assertThat(domainObject1).isNotEqualTo(domainObject2);</span>
+        // HashCodes are equals because the objects are not persisted yet
+<span class="nc" id="L121">        assertThat(domainObject1.hashCode()).isEqualTo(domainObject2.hashCode());</span>
+<span class="nc" id="L122">    }</span>
+
+    /**
+     * Create a FormattingConversionService which use ISO date format, instead of the localized one.
+     * @return the FormattingConversionService
+     */
+    public static FormattingConversionService createFormattingConversionService() {
+<span class="nc" id="L129">        DefaultFormattingConversionService dfcs = new DefaultFormattingConversionService ();</span>
+<span class="nc" id="L130">        DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();</span>
+<span class="nc" id="L131">        registrar.setUseIsoFormat(true);</span>
+<span class="nc" id="L132">        registrar.registerFormatters(dfcs);</span>
+<span class="nc" id="L133">        return dfcs;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span>assignment (1) (8 Jan, 2019 8:57:54 PM)</div></body></html>
