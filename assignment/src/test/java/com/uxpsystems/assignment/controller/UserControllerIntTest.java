@@ -65,7 +65,6 @@ public class UserControllerIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        //this.userService = userService;
         final UserController userController = new UserController(userService);
         this.restUserMockMvc = MockMvcBuilders.standaloneSetup(userController)
             .setCustomArgumentResolvers(pageableArgumentResolver).build();

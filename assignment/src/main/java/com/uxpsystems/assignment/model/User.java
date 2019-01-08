@@ -9,21 +9,14 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-
 
 /**
  * Entity bean with JPA annotations
  * Hibernate provides JPA implementation
- * @author sheetal
  *
  */
 @Entity
 @Table(name="USER")
-//@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
-@JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, 
-allowGetters = true)
 public class User implements java.io.Serializable{
 
 	private static final long serialVersionUID = 4910225916550731446L;
